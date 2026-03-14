@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom'; // ✅ added useNavigate
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { api } from '../lib/api';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ interface AdminLoginProps {
 }
 
 export default function AdminLogin({ onSuccess }: AdminLoginProps) {
+  const navigate = useNavigate(); // ✅ navigation hook
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,9 +25,12 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
     const avatar = searchParams.get('avatar');
     if (token && email) {
       onSuccess(token, email, avatar || undefined);
+      // ✅ redirect to dashboard
+      navigate('/dashboard', { replace: true });
+      // clean the URL after navigation
       window.history.replaceState({}, document.title, '/login');
     }
-  }, [searchParams, onSuccess]);
+  }, [searchParams, onSuccess, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +40,8 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       const data = await api.login(email, password, rememberMe);
       onSuccess(data.token, data.email, data.avatar);
       toast.success('Welcome back!');
+      // ✅ redirect to dashboard
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Invalid credentials');
       toast.error(err.message || 'Authentication failed');
