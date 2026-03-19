@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom'; // ✅ added useNavigate
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { api } from '../lib/api';
 import toast from 'react-hot-toast';
@@ -9,7 +9,7 @@ interface AdminLoginProps {
 }
 
 export default function AdminLogin({ onSuccess }: AdminLoginProps) {
-  const navigate = useNavigate(); // ✅ navigation hook
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,17 +18,17 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle OAuth redirect token (Google)
+  // Handle OAuth redirect token from backend (Google callback)
   useEffect(() => {
     const token = searchParams.get('token');
     const email = searchParams.get('email');
     const avatar = searchParams.get('avatar');
+
     if (token && email) {
       onSuccess(token, email, avatar || undefined);
-      // ✅ redirect to dashboard
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
       navigate('/dashboard', { replace: true });
-      // clean the URL after navigation
-      window.history.replaceState({}, document.title, '/login');
     }
   }, [searchParams, onSuccess, navigate]);
 
@@ -40,7 +40,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       const data = await api.login(email, password, rememberMe);
       onSuccess(data.token, data.email, data.avatar);
       toast.success('Welcome back!');
-      // ✅ redirect to dashboard
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Invalid credentials');
@@ -50,7 +49,8 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
     }
   };
 
-  const styles = {
+  // ✅ Properly typed styles object
+  const styles: { [key: string]: React.CSSProperties } = {
     container: {
       minHeight: '100vh',
       display: 'flex',
@@ -60,7 +60,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       padding: '1rem',
-      position: 'relative' as const,
+      position: 'relative',
     },
     card: {
       width: '100%',
@@ -79,13 +79,13 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
     },
     logoArea: {
       padding: '2rem 2rem 0.5rem 2rem',
-      textAlign: 'center' as const,
+      textAlign: 'center',
     },
     logo: {
       width: '90px',
       height: '90px',
       marginBottom: '0.75rem',
-      objectFit: 'contain' as const,
+      objectFit: 'contain',
     },
     title: {
       fontFamily: "'Playfair Display', serif",
@@ -116,10 +116,10 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       marginBottom: '0.4rem',
     },
     inputWrapper: {
-      position: 'relative' as const,
+      position: 'relative',
     },
     icon: {
-      position: 'absolute' as const,
+      position: 'absolute',
       left: '1rem',
       top: '50%',
       transform: 'translateY(-50%)',
@@ -142,7 +142,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       boxShadow: '0 0 0 3px rgba(0, 163, 108, 0.15)',
     },
     eyeButton: {
-      position: 'absolute' as const,
+      position: 'absolute',
       right: '1rem',
       top: '50%',
       transform: 'translateY(-50%)',
@@ -204,12 +204,12 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       cursor: 'not-allowed',
     },
     divider: {
-      position: 'relative' as const,
+      position: 'relative',
       margin: '1.8rem 0',
-      textAlign: 'center' as const,
+      textAlign: 'center',
     },
     dividerLine: {
-      position: 'absolute' as const,
+      position: 'absolute',
       top: '50%',
       left: 0,
       right: 0,
@@ -217,7 +217,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       backgroundColor: '#e2e8f0',
     },
     dividerText: {
-      position: 'relative' as const,
+      position: 'relative',
       display: 'inline-block',
       padding: '0 1rem',
       backgroundColor: 'white',
@@ -242,7 +242,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       fontSize: '0.95rem',
     },
     footer: {
-      textAlign: 'center' as const,
+      textAlign: 'center',
       fontSize: '0.8rem',
       color: '#94a3b8',
       marginTop: '2rem',
@@ -267,7 +267,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Email */}
             <div style={styles.inputGroup}>
               <label style={styles.label}>Email address</label>
               <div style={styles.inputWrapper}>
@@ -288,7 +287,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
               </div>
             </div>
 
-            {/* Password */}
             <div style={styles.inputGroup}>
               <label style={styles.label}>Password</label>
               <div style={styles.inputWrapper}>
@@ -318,7 +316,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
               </div>
             </div>
 
-            {/* Remember me & Forgot password */}
             <div style={styles.row}>
               <label style={styles.checkboxLabel}>
                 <input
@@ -334,7 +331,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
               </a>
             </div>
 
-            {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
@@ -354,13 +350,11 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
             </button>
           </form>
 
-          {/* Divider */}
           <div style={styles.divider}>
             <div style={styles.dividerLine}></div>
             <span style={styles.dividerText}>Or continue with</span>
           </div>
 
-          {/* Google button */}
           <a
             href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`}
             style={styles.googleButton}
@@ -373,7 +367,11 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
               e.currentTarget.style.borderColor = '#e2e8f0';
             }}
           >
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '20px', height: '20px' }} />
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+              style={{ width: '20px', height: '20px' }}
+            />
             Sign in with Google
           </a>
 
