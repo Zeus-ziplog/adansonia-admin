@@ -93,57 +93,58 @@ export interface Admin {
  */
 const getAuthHeaders = (): HeadersInit => {
   const sessionStr = localStorage.getItem('admin_token');
-  if (!sessionStr) return { 'Content-Type': 'application/json' };
+  if (!sessionStr) return {};
 
   try {
     const session = JSON.parse(sessionStr);
-    return {
-      'Content-Type': 'application/json',
-      ...(session.token ? { Authorization: `Bearer ${session.token}` } : {}),
-    };
+    // Ensure we are returning the headers in a format fetch understands
+    const headers: Record<string, string> = {};
+    if (session.token) {
+      headers['Authorization'] = `Bearer ${session.token}`;
+    }
+    return headers;
   } catch (err) {
     console.error('Failed to parse session', err);
-    return { 'Content-Type': 'application/json' };
+    return {};
   }
 };
 
-/**
- * Generic fetch wrapper with error handling.
- * Automatically adds authentication headers when `requiresAuth` is true.
- */
 const fetchApi = async <T = any>(
   endpoint: string,
   options?: RequestInit,
   requiresAuth: boolean = false
 ): Promise<T> => {
   const url = `${API_BASE}${endpoint}`;
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(requiresAuth ? getAuthHeaders() : {}),
-    ...options?.headers,
-  };
+  
+  // Create a new Headers object to merge everything cleanly
+  const headers = new Headers(options?.headers);
+  headers.set('Content-Type', 'application/json');
 
-  const config: RequestInit = {
-    ...options,
-    headers,
-  };
+  if (requiresAuth) {
+    const authHeaders = getAuthHeaders() as Record<string, string>;
+    Object.keys(authHeaders).forEach(key => {
+      headers.set(key, authHeaders[key]);
+    });
+  }
 
-  const res = await fetch(url, config);
+  const res = await fetch(url, { ...options, headers });
 
   if (!res.ok) {
+    // If we get a 401, it means the token expired
+    if (res.status === 401) {
+      localStorage.removeItem('admin_token');
+      window.location.href = '/login?error=session_expired';
+    }
     let errorMsg = `Error ${res.status}`;
     try {
       const errorData = await res.json();
       errorMsg = errorData.error || errorMsg;
-    } catch {
-      // Ignore JSON parsing errors
-    }
+    } catch { /* ignore */ }
     throw new Error(errorMsg);
   }
 
   return res.json();
 };
-
 // ========== API Client ==========
 
 export const api = {

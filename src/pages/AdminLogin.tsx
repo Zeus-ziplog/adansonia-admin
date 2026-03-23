@@ -356,7 +356,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
           </div>
 
           <a
-            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`}
+            href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
             style={styles.googleButton}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#f8fafc';
