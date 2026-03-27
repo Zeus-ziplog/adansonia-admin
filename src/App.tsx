@@ -13,6 +13,7 @@ import ManageCapabilities from './pages/ManageCapabilities';
 import ManageTestimonials from './pages/ManageTestimonials';
 import ManageCaseStudies from './pages/ManageCaseStudies';
 import ManageAdmins from './pages/ManageAdmins';
+import AuthSuccess from './pages/AuthSuccess'; // 1. Import the new page
 import AdminNavbar from './components/AdminNavbar';
 
 interface Session {
@@ -74,6 +75,7 @@ function AppContent() {
 
   const handleLoginSuccess = (token: string, email: string, avatar?: string) => {
     const data = { token, email, avatar };
+    // We stringify this because your useEffect above uses JSON.parse()
     localStorage.setItem('admin_token', JSON.stringify(data));
     setSession(data);
   };
@@ -95,6 +97,13 @@ function AppContent() {
           session ? <Navigate to="/dashboard" replace /> : <AdminLogin onSuccess={handleLoginSuccess} />
         }
       />
+      
+      {/* 2. Added the AuthSuccess route */}
+      <Route 
+        path="/auth-success" 
+        element={<AuthSuccess onSuccess={handleLoginSuccess} />} 
+      />
+
       <Route
         path="/dashboard"
         element={

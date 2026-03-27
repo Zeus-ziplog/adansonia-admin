@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { api } from '../lib/api';
 import toast from 'react-hot-toast';
@@ -10,7 +10,6 @@ interface AdminLoginProps {
 
 export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,19 +17,8 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle OAuth redirect token from backend (Google callback)
-  useEffect(() => {
-    const token = searchParams.get('token');
-    const email = searchParams.get('email');
-    const avatar = searchParams.get('avatar');
-
-    if (token && email) {
-      onSuccess(token, email, avatar || undefined);
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, document.title, newUrl);
-      navigate('/dashboard', { replace: true });
-    }
-  }, [searchParams, onSuccess, navigate]);
+  // 1. Removed the old useEffect that used searchParams here.
+  // The redirection logic is now handled exclusively by AuthSuccess.tsx.
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +35,12 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    // 2. Use the VITE_API_URL from your new .env file
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    window.location.href = `${apiUrl}/api/auth/google`;
   };
 
   // ✅ Properly typed styles object
@@ -71,7 +65,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.4)',
       overflow: 'hidden',
       border: '1px solid rgba(255, 255, 255, 0.4)',
-      transition: 'transform 0.2s ease',
     },
     header: {
       height: '8px',
@@ -124,7 +117,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       top: '50%',
       transform: 'translateY(-50%)',
       color: '#94a3b8',
-      transition: 'color 0.2s',
     },
     input: {
       width: '100%',
@@ -133,13 +125,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       borderRadius: '16px',
       fontSize: '1rem',
       outline: 'none',
-      transition: 'border-color 0.2s, box-shadow 0.2s',
       backgroundColor: '#ffffff',
-      fontFamily: 'inherit',
-    },
-    inputFocus: {
-      borderColor: '#00A36C',
-      boxShadow: '0 0 0 3px rgba(0, 163, 108, 0.15)',
     },
     eyeButton: {
       position: 'absolute',
@@ -152,30 +138,12 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       cursor: 'pointer',
       padding: '4px',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'color 0.2s',
     },
     row: {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       marginBottom: '1.5rem',
-    },
-    checkboxLabel: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      fontSize: '0.9rem',
-      color: '#475569',
-      cursor: 'pointer',
-    },
-    forgotLink: {
-      fontSize: '0.9rem',
-      color: '#00A36C',
-      textDecoration: 'none',
-      fontWeight: 500,
-      transition: 'color 0.2s',
     },
     button: {
       width: '100%',
@@ -187,43 +155,11 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       borderRadius: '16px',
       fontSize: '1.05rem',
       cursor: 'pointer',
-      transition: 'transform 0.15s, box-shadow 0.2s',
       boxShadow: '0 10px 20px -8px rgba(0, 163, 108, 0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       gap: '0.5rem',
-      letterSpacing: '0.5px',
-    },
-    buttonHover: {
-      transform: 'scale(1.02)',
-      boxShadow: '0 15px 25px -8px rgba(0, 163, 108, 0.6)',
-    },
-    buttonDisabled: {
-      opacity: 0.6,
-      cursor: 'not-allowed',
-    },
-    divider: {
-      position: 'relative',
-      margin: '1.8rem 0',
-      textAlign: 'center',
-    },
-    dividerLine: {
-      position: 'absolute',
-      top: '50%',
-      left: 0,
-      right: 0,
-      height: '1px',
-      backgroundColor: '#e2e8f0',
-    },
-    dividerText: {
-      position: 'relative',
-      display: 'inline-block',
-      padding: '0 1rem',
-      backgroundColor: 'white',
-      color: '#94a3b8',
-      fontSize: '0.9rem',
-      fontWeight: 400,
     },
     googleButton: {
       width: '100%',
@@ -237,15 +173,8 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       background: '#ffffff',
       color: '#334155',
       fontWeight: 500,
-      textDecoration: 'none',
-      transition: 'background 0.2s, border-color 0.2s',
+      cursor: 'pointer',
       fontSize: '0.95rem',
-    },
-    footer: {
-      textAlign: 'center',
-      fontSize: '0.8rem',
-      color: '#94a3b8',
-      marginTop: '2rem',
     },
   };
 
@@ -278,11 +207,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
                   required
                   placeholder="admin@example.com"
                   style={styles.input}
-                  onFocus={(e) => Object.assign(e.currentTarget.style, styles.inputFocus)}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
                 />
               </div>
             </div>
@@ -298,26 +222,15 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
                   required
                   placeholder="••••••••"
                   style={styles.input}
-                  onFocus={(e) => Object.assign(e.currentTarget.style, styles.inputFocus)}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={styles.eyeButton}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#475569')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#94a3b8')}
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             <div style={styles.row}>
-              <label style={styles.checkboxLabel}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: '#475569', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -326,56 +239,33 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
                 />
                 Remember me
               </label>
-              <a href="#" style={styles.forgotLink} onMouseEnter={(e) => (e.currentTarget.style.color = '#047857')} onMouseLeave={(e) => (e.currentTarget.style.color = '#00A36C')}>
+              <a href="#" style={{ fontSize: '0.9rem', color: '#00A36C', textDecoration: 'none', fontWeight: 500 }}>
                 Forgot password?
               </a>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                ...styles.button,
-                ...(loading ? styles.buttonDisabled : {}),
-              }}
-              onMouseEnter={(e) => !loading && Object.assign(e.currentTarget.style, styles.buttonHover)}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 10px 20px -8px rgba(0, 163, 108, 0.5)';
-                }
-              }}
-            >
+            <button type="submit" disabled={loading} style={loading ? { ...styles.button, opacity: 0.6 } : styles.button}>
               {loading ? <Loader2 className="animate-spin" size={20} /> : 'Sign In'}
             </button>
           </form>
 
-          <div style={styles.divider}>
-            <div style={styles.dividerLine}></div>
-            <span style={styles.dividerText}>Or continue with</span>
+          <div style={{ position: 'relative', margin: '1.8rem 0', textAlign: 'center' }}>
+            <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: '#e2e8f0' }}></div>
+            <span style={{ position: 'relative', display: 'inline-block', padding: '0 1rem', backgroundColor: 'white', color: '#94a3b8', fontSize: '0.9rem' }}>
+              Or continue with
+            </span>
           </div>
 
-          <a
-            href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
-            style={styles.googleButton}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.borderColor = '#cbd5e1';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#ffffff';
-              e.currentTarget.style.borderColor = '#e2e8f0';
-            }}
-          >
+          <button onClick={handleGoogleLogin} style={styles.googleButton}>
             <img
               src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
               alt="Google"
               style={{ width: '20px', height: '20px' }}
             />
             Sign in with Google
-          </a>
+          </button>
 
-          <p style={styles.footer}>
+          <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#94a3b8', marginTop: '2rem' }}>
             © {new Date().getFullYear()} Adansonia. All rights reserved.
           </p>
         </div>
