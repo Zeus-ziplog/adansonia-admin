@@ -35,12 +35,17 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   };
 
   const handleGoogleLogin = () => {
-    // 1. Fixed the undefined bug with a robust fallback
-    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    // 1. Get Base URL from Env or Localhost
+    let backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
     
-    // 2. Log this to your browser console to verify it's correct
+    // 2. Normalize: Remove trailing slash to prevent double-slashes (//api/...)
+    if (backendUrl.endsWith('/')) {
+      backendUrl = backendUrl.slice(0, -1);
+    }
+    
     console.log("Redirecting to Backend Auth:", `${backendUrl}/api/auth/google`);
     
+    // 3. Perform Redirect
     window.location.href = `${backendUrl}/api/auth/google`;
   };
 
