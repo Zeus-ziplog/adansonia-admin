@@ -6,54 +6,42 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
 
-  // ── Clean @ alias for src/ ──
-  // Now you can do: import MyComponent from '@/components/MyComponent'
+  // 1. Alias Configuration: Allows for clean imports like '@/components/...'
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
 
-  // ── Proxy for local backend (your /api calls go to port 5000) ──
+  // 2. Development Server & Proxy Configuration
   server: {
+    port: 5173,
     proxy: {
-      // Proxy all /api requests → http://localhost:5000/api/...
+      // Local development: Proxies /api calls to your local server on port 5000
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
-        // Keep /api prefix (most APIs expect it)
-        // If your backend doesn't want /api prefix, change to:
-        // rewrite: (path) => path.replace(/^\/api/, ''),
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
-        secure: false, // if using https locally and self-signed certs
+        secure: false,
+        // No rewrite needed if backend routes already start with /api
       },
-
-      // Bonus: if you ever need to proxy Supabase or another service
-      // '/supabase': {
-      //   target: 'https://your-project.supabase.co',
-      //   changeOrigin: true,
-      //   secure: false,
-      // },
     },
-
-    // Nice-to-have: open browser automatically + show errors overlay
     open: true,
-    hmr: true, // hot module replacement (already default but explicit)
+    hmr: true, // Enable Hot Module Replacement
   },
 
-  // ── Build optimizations (optional but good for production) ──
+  // 3. Build Optimizations for Production
   build: {
     outDir: 'dist',
-    sourcemap: true, // helpful for debugging prod issues
+    emptyOutDir: true, // Clears the dist folder before building
+    sourcemap: false,   // Keeps the production build size smaller
     rollupOptions: {
       output: {
+        // Splitting large libraries into separate chunks for faster page loads
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
+          charts: ['recharts', 'react-is'],
         },
       },
     },
   },
-
-  // ── If you ever use env vars with VITE_ prefix ──
-  // They are auto-injected, no extra config needed
 });
