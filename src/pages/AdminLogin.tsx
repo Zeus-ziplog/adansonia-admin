@@ -17,9 +17,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 1. Removed the old useEffect that used searchParams here.
-  // The redirection logic is now handled exclusively by AuthSuccess.tsx.
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -38,12 +35,15 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   };
 
   const handleGoogleLogin = () => {
-    // 2. Use the VITE_API_URL from your new .env file
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    window.location.href = `${apiUrl}/api/auth/google`;
+    // 1. Fixed the undefined bug with a robust fallback
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    
+    // 2. Log this to your browser console to verify it's correct
+    console.log("Redirecting to Backend Auth:", `${backendUrl}/api/auth/google`);
+    
+    window.location.href = `${backendUrl}/api/auth/google`;
   };
 
-  // ✅ Properly typed styles object
   const styles: { [key: string]: React.CSSProperties } = {
     container: {
       minHeight: '100vh',
@@ -54,7 +54,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       padding: '1rem',
-      position: 'relative',
     },
     card: {
       width: '100%',
@@ -70,112 +69,20 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       height: '8px',
       background: 'linear-gradient(90deg, #00A36C, #34d399, #2dd4bf)',
     },
-    logoArea: {
-      padding: '2rem 2rem 0.5rem 2rem',
-      textAlign: 'center',
-    },
-    logo: {
-      width: '90px',
-      height: '90px',
-      marginBottom: '0.75rem',
-      objectFit: 'contain',
-    },
-    title: {
-      fontFamily: "'Playfair Display', serif",
-      fontSize: 'clamp(1.8rem, 6vw, 2.2rem)',
-      fontWeight: 700,
-      color: '#1e293b',
-      letterSpacing: '-0.02em',
-      margin: 0,
-      lineHeight: 1.2,
-    },
-    subtitle: {
-      color: '#64748b',
-      fontSize: 'clamp(0.8rem, 4vw, 0.9rem)',
-      marginTop: '0.25rem',
-      fontWeight: 400,
-    },
-    form: {
-      padding: '2rem',
-    },
-    inputGroup: {
-      marginBottom: '1.25rem',
-    },
-    label: {
-      display: 'block',
-      fontSize: '0.9rem',
-      fontWeight: 500,
-      color: '#334155',
-      marginBottom: '0.4rem',
-    },
-    inputWrapper: {
-      position: 'relative',
-    },
-    icon: {
-      position: 'absolute',
-      left: '1rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: '#94a3b8',
-    },
-    input: {
-      width: '100%',
-      padding: '0.85rem 1rem 0.85rem 2.8rem',
-      border: '1px solid #e2e8f0',
-      borderRadius: '16px',
-      fontSize: '1rem',
-      outline: 'none',
-      backgroundColor: '#ffffff',
-    },
-    eyeButton: {
-      position: 'absolute',
-      right: '1rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      background: 'none',
-      border: 'none',
-      color: '#94a3b8',
-      cursor: 'pointer',
-      padding: '4px',
-      display: 'flex',
-    },
-    row: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: '1.5rem',
-    },
-    button: {
-      width: '100%',
-      background: 'linear-gradient(135deg, #00A36C, #047857)',
-      color: 'white',
-      fontWeight: 600,
-      padding: '0.9rem',
-      border: 'none',
-      borderRadius: '16px',
-      fontSize: '1.05rem',
-      cursor: 'pointer',
-      boxShadow: '0 10px 20px -8px rgba(0, 163, 108, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0.5rem',
-    },
-    googleButton: {
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0.75rem',
-      padding: '0.85rem',
-      border: '1px solid #e2e8f0',
-      borderRadius: '16px',
-      background: '#ffffff',
-      color: '#334155',
-      fontWeight: 500,
-      cursor: 'pointer',
-      fontSize: '0.95rem',
-    },
+    logoArea: { padding: '2rem 2rem 0.5rem 2rem', textAlign: 'center' },
+    logo: { width: '90px', height: '90px', marginBottom: '0.75rem', objectFit: 'contain' },
+    title: { fontFamily: "'Playfair Display', serif", fontSize: '2.2rem', fontWeight: 700, color: '#1e293b', margin: 0 },
+    subtitle: { color: '#64748b', fontSize: '0.9rem', marginTop: '0.25rem' },
+    form: { padding: '2rem' },
+    inputGroup: { marginBottom: '1.25rem' },
+    label: { display: 'block', fontSize: '0.9rem', fontWeight: 500, color: '#334155', marginBottom: '0.4rem' },
+    inputWrapper: { position: 'relative' },
+    icon: { position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' },
+    input: { width: '100%', padding: '0.85rem 1rem 0.85rem 2.8rem', border: '1px solid #e2e8f0', borderRadius: '16px', fontSize: '1rem' },
+    eyeButton: { position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' },
+    row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' },
+    button: { width: '100%', background: 'linear-gradient(135deg, #00A36C, #047857)', color: 'white', fontWeight: 600, padding: '0.9rem', border: 'none', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' },
+    googleButton: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '0.85rem', border: '1px solid #e2e8f0', borderRadius: '16px', background: '#ffffff', color: '#334155', fontWeight: 500, cursor: 'pointer' },
   };
 
   return (
@@ -200,14 +107,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
               <label style={styles.label}>Email address</label>
               <div style={styles.inputWrapper}>
                 <Mail size={18} style={styles.icon} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="admin@example.com"
-                  style={styles.input}
-                />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@example.com" style={styles.input} />
               </div>
             </div>
 
@@ -215,14 +115,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
               <label style={styles.label}>Password</label>
               <div style={styles.inputWrapper}>
                 <Lock size={18} style={styles.icon} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  style={styles.input}
-                />
+                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" style={styles.input} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -231,17 +124,10 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
 
             <div style={styles.row}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: '#475569', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  style={{ accentColor: '#00A36C', width: '16px', height: '16px' }}
-                />
+                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: '#00A36C', width: '16px', height: '16px' }} />
                 Remember me
               </label>
-              <a href="#" style={{ fontSize: '0.9rem', color: '#00A36C', textDecoration: 'none', fontWeight: 500 }}>
-                Forgot password?
-              </a>
+              <a href="#" style={{ fontSize: '0.9rem', color: '#00A36C', textDecoration: 'none', fontWeight: 500 }}>Forgot password?</a>
             </div>
 
             <button type="submit" disabled={loading} style={loading ? { ...styles.button, opacity: 0.6 } : styles.button}>
@@ -251,17 +137,11 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
 
           <div style={{ position: 'relative', margin: '1.8rem 0', textAlign: 'center' }}>
             <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: '#e2e8f0' }}></div>
-            <span style={{ position: 'relative', display: 'inline-block', padding: '0 1rem', backgroundColor: 'white', color: '#94a3b8', fontSize: '0.9rem' }}>
-              Or continue with
-            </span>
+            <span style={{ position: 'relative', display: 'inline-block', padding: '0 1rem', backgroundColor: 'white', color: '#94a3b8', fontSize: '0.9rem' }}>Or continue with</span>
           </div>
 
           <button onClick={handleGoogleLogin} style={styles.googleButton}>
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              alt="Google"
-              style={{ width: '20px', height: '20px' }}
-            />
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" style={{ width: '20px', height: '20px' }} />
             Sign in with Google
           </button>
 

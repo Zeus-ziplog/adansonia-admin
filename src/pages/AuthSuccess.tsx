@@ -17,15 +17,15 @@ const AuthSuccess = ({ onSuccess }: AuthSuccessProps) => {
 
     if (token && email) {
       // 2. Trigger the handleLoginSuccess logic from App.tsx
-      // This saves the data as a JSON string in localStorage as your app expects.
       onSuccess(token, email, avatar);
       
       // 3. Clean transition to the dashboard
-      navigate('/dashboard');
+      // { replace: true } ensures they can't "Go Back" to this loading page
+      navigate('/dashboard', { replace: true });
     } else {
       // 4. Fallback if the URL was tampered with or the handshake failed
       console.error("Authentication failed: Required parameters missing from callback URL.");
-      navigate('/login?error=auth_incomplete');
+      navigate('/login?error=auth_incomplete', { replace: true });
     }
   }, [searchParams, navigate, onSuccess]);
 
@@ -34,7 +34,7 @@ const AuthSuccess = ({ onSuccess }: AuthSuccessProps) => {
       <div className="text-center">
         {/* Adansonia Branded Spinner */}
         <div className="mb-6 flex justify-center">
-          <div className="h-14 w-14 animate-spin rounded-full border-4 border-blue-500 border-t-transparent shadow-lg"></div>
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-[#00A36C] border-t-transparent shadow-lg"></div>
         </div>
         <h2 className="text-3xl font-bold mb-3 tracking-tight">Securing Session</h2>
         <p className="text-slate-400 font-medium">Verifying your administrator status...</p>

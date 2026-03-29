@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import './tailwind.css';
 import './style.css';
 
+// Page Imports
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageStaff from './pages/ManageStaff';
@@ -13,7 +14,7 @@ import ManageCapabilities from './pages/ManageCapabilities';
 import ManageTestimonials from './pages/ManageTestimonials';
 import ManageCaseStudies from './pages/ManageCaseStudies';
 import ManageAdmins from './pages/ManageAdmins';
-import AuthSuccess from './pages/AuthSuccess'; // 1. Import the new page
+import AuthSuccess from './pages/AuthSuccess'; 
 import AdminNavbar from './components/AdminNavbar';
 
 interface Session {
@@ -23,6 +24,7 @@ interface Session {
   id?: string;
 }
 
+// Higher Order Component to protect private routes
 function ProtectedRoute({
   children,
   session,
@@ -51,6 +53,7 @@ function AppContent() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
+  // Persistent Session Check
   useEffect(() => {
     const saved = localStorage.getItem('admin_token');
     if (saved) {
@@ -75,22 +78,23 @@ function AppContent() {
 
   const handleLoginSuccess = (token: string, email: string, avatar?: string) => {
     const data = { token, email, avatar };
-    // We stringify this because your useEffect above uses JSON.parse()
+    // Stringify for localStorage persistence
     localStorage.setItem('admin_token', JSON.stringify(data));
     setSession(data);
   };
 
   if (loading) {
     return (
-      <div className="admin-loading-screen">
-        <div className="spinner" />
-        <p>Loading dashboard...</p>
+      <div className="admin-loading-screen flex flex-col items-center justify-center h-screen bg-[#0f172a] text-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#00A36C] border-t-transparent mb-4" />
+        <p className="font-medium">Initializing Adansonia Admin...</p>
       </div>
     );
   }
 
   return (
     <Routes location={location} key={location.pathname}>
+      {/* 1. Login Route */}
       <Route
         path="/login"
         element={
@@ -98,12 +102,13 @@ function AppContent() {
         }
       />
       
-      {/* 2. Added the AuthSuccess route */}
+      {/* 2. Google OAuth Handshake Route */}
       <Route 
         path="/auth-success" 
         element={<AuthSuccess onSuccess={handleLoginSuccess} />} 
       />
 
+      {/* 3. Protected Dashboard & Management Routes */}
       <Route
         path="/dashboard"
         element={
@@ -168,6 +173,8 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+
+      {/* 4. Global Redirects */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
